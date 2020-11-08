@@ -10,14 +10,6 @@ repositories {
     jcenter()
 }
 
-micronaut {
-    testRuntime "junit5"
-    processing {
-        incremental true
-        annotations "com.bitsflux.patchable.*"
-    }
-}
-
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
@@ -26,9 +18,6 @@ dependencies {
 
     implementation("io.micronaut:micronaut-validation")
     implementation("io.micronaut:micronaut-runtime")
-
-    testCompile("org.assertj:assertj-core:3.11.1")
-    testRuntimeOnly("ch.qos.logback:logback-classic")
 }
 
 java {

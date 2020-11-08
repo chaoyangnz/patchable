@@ -11,16 +11,37 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-public final class PatchUtil {
+final class PatchUtil {
 
-    public static JsonNode merge(JsonNode patchNode, JsonNode targetNode, Class targetClass) {
-        return merge(patchNode, targetNode, PatchableFields.of(targetClass));
+    public static JsonNode merge(JsonNode patchNode, JsonNode targetNode, Class patchClass, Class targetClass) {
+        return merge(patchNode, targetNode, FieldSetMeta.of(patchClass), PatchableMeta.of(targetClass));
     }
 
-    private static JsonNode merge(JsonNode patchNode, JsonNode targetNode, PatchableFields patchableFields) {
+    private static JsonNode merge(
+            JsonNode patchNode,
+            JsonNode targetNode,
+            FieldSetMeta fieldSetMeta,
+            PatchableMeta patchableMeta) {
 
         asStream(patchNode.fieldNames(), false)
-                .filter(field -> patchableFields.containsKey(field) && targetNode.get(field) != null)
+                .filter(field -> {
+                    boolean included = fieldSetMeta.included(field);
+                    if(!included) {
+                        log.debug("Field `{}` is ignored as per {} in patch JSON: {}", field, fieldSetMeta.patchClass(), patchNode);
+                    }
+                    return included;
+                })
+                .filter(field -> {
+                    boolean fieldExists = targetNode.get(field) != null;
+                    if(!fieldExists) {
+                        log.debug("Field `{}` doesn't exist in `{}`", field, patchableMeta.targetClass());
+                    }
+                    boolean fieldPatchable = patchableMeta.patchable(field);
+                    if(!fieldPatchable) {
+                        log.debug("Field `{}` is not patchable in `{}`", field, patchableMeta.targetClass());
+                    }
+                    return fieldExists && fieldPatchable;
+                })
                 .forEach(patchFieldName -> {
                     final JsonNode targetFieldNode = targetNode.get(patchFieldName);
                     final JsonNode patchFieldNode = getPatchFieldNode(patchNode, patchFieldName);
@@ -30,7 +51,7 @@ public final class PatchUtil {
                     } else if(patchFieldNode.isNull() && targetFieldNode != null) {
                         ((ObjectNode) targetNode).replace(patchFieldName, null);
                     } else if (targetFieldNode != null && targetFieldNode.isObject()) {
-                        merge(targetFieldNode, patchFieldNode, patchableFields.get(patchFieldName));
+                        merge(patchFieldNode, targetFieldNode, fieldSetMeta.field(patchFieldName), patchableMeta.field(patchFieldName));
                     } else if(targetNode instanceof ObjectNode) {
                         ((ObjectNode) targetNode).replace(patchFieldName, patchFieldNode);
                     }
