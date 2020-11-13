@@ -1,4 +1,4 @@
-package com.bitsflux.patchable;
+package patchable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.convert.ArgumentConversionContext;

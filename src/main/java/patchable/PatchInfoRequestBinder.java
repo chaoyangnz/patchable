@@ -1,4 +1,4 @@
-package com.bitsflux.patchable;
+package patchable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,13 +44,29 @@ public class PatchInfoRequestBinder implements TypedRequestArgumentBinder<PatchI
         Class patchType = patchInfoParameterTypes.get(0);
         Class targetType = patchInfoParameterTypes.get(1);
 
+        if(patchType == null) {
+            throw new IllegalArgumentException("Patch Type is missing for PatchInfo");
+        }
+
+        if(targetType == null) {
+            throw new IllegalArgumentException("Target Type is missing for PatchInfo");
+        }
+
         Optional<JsonNode> body = source.getBody(JsonNode.class);
 
         if(body.isEmpty()) {
             return BindingResult.EMPTY;
         }
         try {
-            PatchInfo patchInfo = new PatchInfo(objectMapper, patchType, targetType, body.get());
+            JsonNode patchNode = body.get();
+            Object patch = objectMapper.convertValue(patchNode, patchType);;
+            PatchInfo patchInfo = new PatchInfo(patch, (target) -> {
+                JsonNode targetNode = objectMapper.convertValue(target, JsonNode.class);
+                return objectMapper.convertValue(
+                        PatchUtil.merge(patchNode, targetNode, patchType, targetType),
+                        target.getClass()
+                );
+            });
             return () -> Optional.of(patchInfo);
         } catch (Exception ex) {
             log.warn("PatchInfo binding error", ex);

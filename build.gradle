@@ -3,7 +3,7 @@ plugins {
 }
 
 version "0.1"
-group "com.bitsflux.patchable"
+group "patchable"
 
 repositories {
     mavenCentral()
@@ -14,7 +14,7 @@ micronaut {
     testRuntime "junit5"
     processing {
         incremental true
-        annotations "com.bitsflux.patchable.*"
+        annotations "patchable.*"
     }
 }
 

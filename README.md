@@ -4,7 +4,7 @@
 
 Gradle:
 
-`implementation 'com.bitsflux.patchable:patchable-micronaut:1.0.0`
+`implementation 'patchable:patchable-micronaut:1.0.0`
 
 ## Usage
 

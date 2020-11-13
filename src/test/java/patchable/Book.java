@@ -1,4 +1,4 @@
-package com.bitsflux.patchable;
+package patchable;
 
 import io.micronaut.core.annotation.Introspected;
 import lombok.Getter;

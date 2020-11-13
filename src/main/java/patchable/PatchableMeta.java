@@ -1,4 +1,4 @@
-package com.bitsflux.patchable;
+package patchable;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

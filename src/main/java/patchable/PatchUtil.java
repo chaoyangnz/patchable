@@ -1,4 +1,4 @@
-package com.bitsflux.patchable;
+package patchable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
